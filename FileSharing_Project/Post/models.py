@@ -1,10 +1,9 @@
 from django.db import models
-from User.models import *
 
 # Create your models here.
 
 
-class file(models.Model):  # 文件相关信息表
+class File(models.Model):  # 文件相关信息表
     auth_id = models.BigIntegerField(verbose_name='上传者id', default=0)
     name = models.CharField(verbose_name='文件名', max_length=75)
     suffix = models.CharField(verbose_name='后缀名', max_length=75)

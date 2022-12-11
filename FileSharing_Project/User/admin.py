@@ -7,5 +7,5 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('nickname','avatar','gender','openid','QQ','WeChat')
     search_fields = ('nickname','openid')
 
-admin.site.register(user,UserAdmin)
-admin.site.register([dashboard,collection_post,DownloadFile_post])
+admin.site.register(User,UserAdmin)
+admin.site.register([Dashboard,CollectionPost,DownloadFilePost])

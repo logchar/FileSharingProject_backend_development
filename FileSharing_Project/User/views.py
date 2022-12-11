@@ -1,15 +1,9 @@
-import json
-import time
-import urllib
-from pathlib import Path
-
 from django.http import JsonResponse
-from django.shortcuts import render
-
 from django.views.decorators.csrf import csrf_exempt
 
-from Post.models import file
-from Post.osssys import oss
+from pathlib import Path
+
+from Post.models import File
 from User.models import *
 from FileSharing_Project import jwt_auth
 
@@ -22,8 +16,8 @@ def get_user_info(request):
     if jwt_code['is_real']:
         if request.method == 'GET':
             user_id = jwt_code['user_id']
-            user_obj = user.objects.filter(id=user_id).values('id', 'nickname', 'gender', 'openid', 'QQ', 'WeChat')[0]
-            dashboard_details = dashboard.objects.filter(user__id=user_id).values('collection_num', 'UploadFile_num', 'DownloadFile_num')[0]
+            user_obj = User.objects.filter(id=user_id).values('id', 'nickname', 'gender', 'openid', 'QQ', 'WeChat')[0]
+            dashboard_details = Dashboard.objects.filter(user__id=user_id).values('collection_num', 'UploadFile_num', 'DownloadFile_num')[0]
             user_info = dict( user_obj, **dashboard_details )
             response = {
                 "code": "00000",
@@ -56,8 +50,8 @@ def get_avatar(request):
         if request.method == 'GET':
             user_id = jwt_code['user_id']
             pic_url = "/static/media_pics/"
-            if user.objects.filter(id=user_id).exists():
-                pic_name = user.objects.filter(id=user_id).values('avatar')[0]['avatar']
+            if User.objects.filter(id=user_id).exists():
+                pic_name = User.objects.filter(id=user_id).values('avatar')[0]['avatar']
                 pic_url = pic_url + pic_name + "_" + str(user_id)
             else:
                 pic_url = pic_url + "DefaultAvatar.png"
@@ -92,18 +86,18 @@ def get_collection_list(request):
         if request.method == 'GET':
             user_id = jwt_code['user_id']
             post_list = []
-            collection_list = collection_post.objects.filter(userID=user_id)
+            collection_list = CollectionPost.objects.filter(userID=user_id)
             if collection_list.exists():
-                post_id_list = list(collection_list.values_list('fileID', flat=True)) #post_id???
+                post_id_list = list(collection_list.values_list('fileID', flat=True))
                 for i in range(len(post_id_list)):
                     post_id = int(post_id_list[i])
-                    if file.objects.filter(id=post_id).exists():
-                        post_obj = file.objects.filter(id=post_id).values('id', 'auth_id', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')[0]
+                    if File.objects.filter(id=post_id).exists():
+                        post_obj = File.objects.filter(id=post_id).values('id', 'auth_id', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')[0]
                         post_list.append(post_obj)
                     else:
-                        collection_num = dashboard.objects.filter(user=user_id).values('collection_num')[0]['collection_num']
-                        dashboard.objects.filter(user=user_id).update(collection_num=collection_num-1)
-                        collection_post.objects.filter(userID=user_id,fileID=post_id).delete()
+                        collection_num = Dashboard.objects.filter(user=user_id).values('collection_num')[0]['collection_num']
+                        Dashboard.objects.filter(user=user_id).update(collection_num=collection_num-1)
+                        CollectionPost.objects.filter(userID=user_id, fileID=post_id).delete()
             response = {
                 "code": "00000",
                 "msg": "请求成功",
@@ -135,12 +129,12 @@ def get_upload_list(request):
         if request.method == 'GET':
             user_id = jwt_code['user_id']
             post_list = []
-            upload_list = file.objects.filter(auth_id=user_id)
+            upload_list = File.objects.filter(auth_id=user_id)
             if upload_list.exists():
                 post_id_list = list(upload_list.values_list('id', flat=True))
                 for i in range(len(post_id_list)):
                     post_id = int(post_id_list[i])
-                    post_obj = file.objects.filter(id=post_id).values('id', 'auth_id', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')[0]
+                    post_obj = File.objects.filter(id=post_id).values('id', 'auth_id', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')[0]
                     post_list.append(post_obj)
             response = {
                 "code": "00000",
@@ -173,18 +167,18 @@ def get_download_list(request):
         if request.method == 'GET':
             user_id = jwt_code['user_id']
             post_list = []
-            download_list = DownloadFile_post.objects.filter(userID=user_id)
+            download_list = DownloadFilePost.objects.filter(userID=user_id)
             if download_list.exists():
-                post_id_list = list(DownloadFile_post.objects.values_list('fileID', flat=True))
+                post_id_list = list(DownloadFilePost.objects.values_list('fileID', flat=True))
                 for i in range(len(post_id_list)):
                     post_id = int(post_id_list[i])
-                    if file.objects.filter(id=post_id).exists():
-                        post_obj = file.objects.filter(id=post_id).values('id', 'auth_id', 'name', 'suffix', 'address','size', 'department', 'subject', 'readme','download_num', 'auth_name')[0]
+                    if File.objects.filter(id=post_id).exists():
+                        post_obj = File.objects.filter(id=post_id).values('id', 'auth_id', 'name', 'suffix', 'address','size', 'department', 'subject', 'readme','download_num', 'auth_name')[0]
                         post_list.append(post_obj)
                     else:
-                        download_num = dashboard.objects.filter(user=user_id).values('DownloadFile_num')[0]['DownloadFile_num']
-                        dashboard.objects.filter(user=user_id).update(DownloadFile_num=download_num - 1)
-                        DownloadFile_post.objects.filter(userID=user_id, fileID=post_id).delete()
+                        download_num = Dashboard.objects.filter(user=user_id).values('DownloadFile_num')[0]['DownloadFile_num']
+                        Dashboard.objects.filter(user=user_id).update(DownloadFile_num=download_num - 1)
+                        DownloadFilePost.objects.filter(userID=user_id, fileID=post_id).delete()
             response = {
                 "code": "00000",
                 "msg": "请求成功",
@@ -216,9 +210,9 @@ def get_file_list(request):
         if request.method == 'GET':
             file_list = []
             start_id = request.GET.get('start_id')
-            for i in range(int(start_id),int(start_id)+10):
-                if file.objects.filter(id=i).exists():
-                    file_obj = file.objects.filter(id=i).values('id', 'auth_id', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')[0]
+            for i in range(int(start_id), int(start_id)+10):
+                if File.objects.filter(id=i).exists():
+                    file_obj = File.objects.filter(id=i).values('id', 'auth_id', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')[0]
                     file_list.append(file_obj)
             response = {
                 "code": "00000",
@@ -255,7 +249,7 @@ def updata_avatar(request):
             with open(pic_url, 'wb') as f:
                 for content in avatar.chunks():
                     f.write(content)
-            user.objects.filter(id=user_id).update(avatar=avatar)
+            User.objects.filter(id=user_id).update(avatar=avatar)
             response = {
                 "code": "00000",
                 "msg": "请求成功",
@@ -287,7 +281,7 @@ def updata_nickname(request):
         if request.method == 'GET':
             nickname = request.GET.get('nickname')
             user_id = jwt_code['user_id']
-            user.objects.filter(id=user_id).update(nickname=nickname)
+            User.objects.filter(id=user_id).update(nickname=nickname)
             response = {
                 "code": "00000",
                 "msg": "请求成功",
@@ -313,13 +307,13 @@ def updata_nickname(request):
 
 
 @csrf_exempt
-def updata_QQ(request):
+def updata_qq(request):
     jwt_code = jwt_auth.jwt_sys(request).main()
     if jwt_code['is_real']:
         if request.method == 'GET':
             QQ = request.GET.get('QQ')
             user_id = jwt_code['user_id']
-            user.objects.filter(id=user_id).update(QQ=QQ)
+            User.objects.filter(id=user_id).update(QQ=QQ)
             response = {
                 "code": "00000",
                 "msg": "请求成功",
@@ -345,13 +339,13 @@ def updata_QQ(request):
 
 
 @csrf_exempt
-def updata_WeChat(request):
+def updata_wechat(request):
     jwt_code = jwt_auth.jwt_sys(request).main()
     if jwt_code['is_real']:
         if request.method == 'GET':
             WeChat = request.GET.get('WeChat')
             user_id = jwt_code['user_id']
-            user.objects.filter(id=user_id).update(WeChat=WeChat)
+            User.objects.filter(id=user_id).update(WeChat=WeChat)
             response = {
                 "code": "00000",
                 "msg": "请求成功",

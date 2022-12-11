@@ -2,6 +2,7 @@ import jwt
 import datetime
 import time
 
+
 class jwt_sys():
     def __init__(self,req):
         self.req = req
