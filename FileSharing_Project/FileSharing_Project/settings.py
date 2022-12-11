@@ -79,11 +79,11 @@ WSGI_APPLICATION = "FileSharing_Project.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "filesharing_project",
-        "USER": "root",
-        "PASSWORD": "GAOchuHAN945",
-        "HOST": "127.0.0.1",
-        "PORT": "3305",
+        "NAME": "resource",
+        "USER": "resource",
+        "PASSWORD": "Yj!X9rmTW_Dd",
+        "HOST": "47.96.30.120",
+        "PORT": "3306",
     }
 }
 
