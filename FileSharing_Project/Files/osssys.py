@@ -9,11 +9,10 @@ class Oss:
         self.endpoint = "oss-cn-hangzhou.aliyuncs.com"
         self.bucketName = "zq-rookie-file-sharing"
 
-    def upload_file(self, file, auth_id, name, file_id, suffix):
-        file_name = str(auth_id)+"_"+name+"_"+str(file_id)+"."+suffix  # 用户id_文件名_文件id.后缀
+    def upload_file(self, filename, file):
         auth = oss2.Auth(self.accessKeyId, self.accessKeySecret)
         bucket = oss2.Bucket(auth, self.endpoint, self.bucketName, connect_timeout=60)
-        res = bucket.put_object(file_name, file)
+        res = bucket.put_object(filename, file)
         if res.status // 100 == 2:
             return True
         else:

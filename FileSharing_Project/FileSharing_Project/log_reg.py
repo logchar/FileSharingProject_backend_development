@@ -4,7 +4,7 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from User.models import User, Dashboard
+from Users.models import User, Dashboard
 from FileSharing_Project.jwt_auth import jwt_sys
 
 

@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "User.apps.UserConfig",
-    "Post.apps.PostConfig",
+    "Users.apps.UsersConfig",
+    "Files.apps.FilesConfig",
 ]
 
 MIDDLEWARE = [
@@ -80,10 +80,10 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "resource",
-        "USER": "resource",
-        "PASSWORD": "Yj!X9rmTW_Dd",
-        "HOST": "47.96.30.120",
-        "PORT": "3306",
+        "USER": "root",
+        "PASSWORD": "GAOchuHAN945",
+        "HOST": "127.0.0.1",
+        "PORT": "3305",
     }
 }
 

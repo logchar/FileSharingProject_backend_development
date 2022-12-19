@@ -15,15 +15,30 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from django.urls import include
 from django.contrib.staticfiles import views as my_view
 
 from FileSharing_Project.log_reg import log_reg
+from Files.views import *
+from Users.views import *
 
 urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', my_view.serve),  # 头像图片存储
     path("admin/", admin.site.urls),
     path("login/", log_reg),  # 登录
-    path("checkfile/", include('User.urls')),  # 浏览文件 and 用户信息
-    path("operation/", include('Post.urls')),  # 操作文件
+
+    path("users/<int:pk>", UserViewSet.as_view({'get': 'get_userinfo'})),
+    path("users/<int:pk>", UserViewSet.as_view({'post': 'get_userfile_list'})),
+    path("users/<int:pk>", UserViewSet.as_view({'put': 'perform_update_userinfo'})),
+
+    path("files/", FileViewSet.as_view({'get': 'get_list'})),
+    path("files/", FileViewSet.as_view({'post': 'perform_upload'})),
+    path("files/<int:pk>/", FileViewSet.as_view({'get': 'get_detail'})),
+    path("files/<int:pk>/", FileViewSet.as_view({'put': 'perform_change'})),
+    path("files/<int:pk>/", FileViewSet.as_view({'delete': 'perform_delete'})),
+
+    path("collections/<int:pk>", CollectionView.as_view()),
+
+    path("downloads/<int:pk>", DownloadView.as_view()),
+
+    path("search/", FileViewSet.as_view({'get': 'perform_search'})),
 ]
