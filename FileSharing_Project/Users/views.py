@@ -14,27 +14,27 @@ class UserViewSet(ViewSet):
         jwt_code = jwt_auth.jwt_sys(request).main()
         if jwt_code['is_real'] is not True:
             return True  # if error return true
-        request.data['user_id'] = jwt_code['user_id']
+        request.data['user'] = jwt_code['user_id']
 
-    def get_userinfo(self, request, pk):
+    def get_userinfo(self, request):
         if self.jwt_token(request): raise PermissionError('Token错误')
         try:
-            user = User.objects.get(id=pk)
+            user = User.objects.get(id=request.data['user_id'])
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = UserSerializer(instance=user)
         return Response(serializer.data)
 
-    def get_userfile_list(self, request, pk):
+    def get_userfile_list(self, request):
         if self.jwt_token(request): raise PermissionError('Token错误')
-        queryset = File.objects.filter(user_id=pk)
+        queryset = File.objects.filter(user_id=request.data['user_id'])
         serializer = FileSerializer(instance=queryset, many=True)
         return Response(serializer.data)
 
-    def perform_update_userinfo(self, request, pk):
+    def perform_update_userinfo(self, request):
         if self.jwt_token(request): raise PermissionError('Token错误')
         try:
-            user = User.objects.get(id=pk)
+            user = User.objects.get(id=request.data['user_id'])
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializers = UserSerializer(instance=user, data=request.data)
@@ -49,7 +49,7 @@ class CollectionView(APIView):
         jwt_code = jwt_auth.jwt_sys(request).main()
         if jwt_code['is_real'] is not True:
             return True  # if error return true
-        request.data['user_id'] = jwt_code['user_id']
+        request.data['user'] = jwt_code['user_id']
 
     def get(self, request):
         if self.jwt_token(request): raise PermissionError('Token错误')
@@ -94,7 +94,7 @@ class DownloadView(APIView):
         jwt_code = jwt_auth.jwt_sys(request).main()
         if jwt_code['is_real'] is not True:
             return True  # if error return true
-        request.data['user_id'] = jwt_code['user_id']
+        request.data['user'] = jwt_code['user_id']
 
     def get(self, request):
         if self.jwt_token(request): raise PermissionError('Token错误')
@@ -113,12 +113,12 @@ class DownloadView(APIView):
         except File.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         user_id = request.data['user_id']
-        if DownloadFilePost.objects.get(user_id=user_id, file_id=pk):
+        if DownloadFilePost.objects.get(user_id=user_id, file_id=pk) is None:
             DownloadFilePost.objects.create(user_id=user_id, file_id=pk)
-        download_num = File.objects.filter(id=pk).values('download_num')[0]['download_num']
-        File.objects.filter(id=pk).update(download_num=download_num + 1)
-        DownloadFile_num = Dashboard.objects.filter(id=user_id).values('DownloadFile_num')[0]['DownloadFile_num']
-        Dashboard.objects.filter(id=user_id).update(DownloadFile_num=DownloadFile_num + 1)
+            download_num = File.objects.filter(id=pk).values('download_num')[0]['download_num']
+            File.objects.filter(id=pk).update(download_num=download_num + 1)
+            DownloadFile_num = Dashboard.objects.filter(id=user_id).values('DownloadFile_num')[0]['DownloadFile_num']
+            Dashboard.objects.filter(id=user_id).update(DownloadFile_num=DownloadFile_num + 1)
         serializer = FileSerializer(instance=file)
         return Response(serializer.data)
 

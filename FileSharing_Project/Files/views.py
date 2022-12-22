@@ -14,7 +14,7 @@ class FileViewSet(ViewSet):
         jwt_code = jwt_auth.jwt_sys(request).main()
         if jwt_code['is_real'] is not True:
             return True  # if error return true
-        request.data['user_id'] = jwt_code['user_id']
+        request.data['user'] = jwt_code['user_id']
 
     def get_list(self, request):
         if self.jwt_token(request): raise PermissionError('Token错误')
@@ -34,16 +34,18 @@ class FileViewSet(ViewSet):
     def perform_upload(self, request):
         if self.jwt_token(request): raise PermissionError('Token错误')
         data = request.data
-        data['suffix'] = data['file'].name.split('.')[-1]
-        data['size'] = data['file'].size / 1024.0 / 1024.0  # is this right???
+        data['suffix'] = data['name'].split('.')[-1]
+        fileobj = request.File[data['name']]
+        data['size'] = fileobj.size / 1024.0
         data['download_num'] = 0
-        file_name = data['user_id'] + "_" + data['name'] + "_" + str(File.objects.all().count()) + "." + data['suffix']
-        is_updata = Oss().upload_file(filename=file_name, file=data['file'].read())
-        if is_updata is False:
+        file_name = str(data['user_id']) + "_" + data['name'] + "_" + str(File.objects.all().count()) + "." + data['suffix']
+        is_update = Oss().upload_file(filename=file_name, file=fileobj.read())
+        if is_update is False:
             raise PermissionError('上传失败')
+        data['name'] = file_name
         data['address'] = Oss().get_url(file_name)
-        upload_num = Dashboard.objects.filter(user_id=request.data['user_id'])
-        Dashboard.objects.filter(user_id=request.data['user_id']).update(upload_num=upload_num + 1)
+        upload_num = Dashboard.objects.filter(user_id=request.data['user_id']).values('UploadFile_num')[0]['UploadFile_num']
+        Dashboard.objects.filter(user_id=request.data['user_id']).update(UploadFile_num=upload_num + 1)
         serializer = FileSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -58,7 +60,7 @@ class FileViewSet(ViewSet):
         data = request.data
         data['suffix'] = data['file'].name.split('.')[-1]
         data['size'] = data['file'].size / 1024.0 / 1024.0
-        file_name = data['user_id'] + "_" + data['name'] + "_" + str(File.objects.all().count()) + "." + data['suffix']
+        file_name = str(data['user_id']) + "_" + data['name'] + "_" + str(File.objects.all().count()) + "." + data['suffix']
         is_updata = Oss().upload_file(filename=file_name, file=data['file'].read())
         if is_updata is False:
             raise PermissionError('上传失败')
@@ -74,9 +76,14 @@ class FileViewSet(ViewSet):
             file = File.objects.get(id=pk)
         except File.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        name = file.values('name')[0]['name']
+        is_delete = Oss().delete_file(name)
+        if is_delete is False: raise PermissionError('Oss删除失败')
         file.delete()
-        upload_num = Dashboard.objects.filter(user_id=request.data['user_id'])
-        Dashboard.objects.filter(user_id=request.data['user_id']).update(upload_num=upload_num - 1)
+        upload_num = Dashboard.objects.filter(user_id=request.data['user_id']).values('UploadFile_num')[0]['UploadFile_num']
+        Dashboard.objects.filter(user_id=request.data['user_id']).update(UploadFile_num=upload_num - 1)
+        download_num = File.objects.filter(id=pk).values('download_num')[0]['download_num']
+        File.objects.filter(id=pk).update(download_num=download_num - 1)
         return Response(status=status.HTTP_200_OK)
 
     def perform_search(self, request):

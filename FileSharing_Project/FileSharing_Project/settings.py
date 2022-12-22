@@ -120,9 +120,9 @@ USE_L10N = True
 
 USE_TZ = False
 
-STATICFILES_STORAGE = 'django_oss_storage.backends.OssStaticStorage'
+STATICFILES_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
-DEFAULT_FILE_STORAGE = 'django_oss_storage.backends.OssMediaStorage'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 OSS_ACCESS_KEY_ID = "LTAI5t9ex2r4GWHcu3tHZwPU"
 

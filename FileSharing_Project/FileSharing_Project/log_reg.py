@@ -21,8 +21,8 @@ def log_reg(request):
         if User.objects.filter(openid=openid).exists():
             user_id = User.objects.filter(openid=openid).values('id')[0]['id']
         else:
-            nickname = "用户_" + str(openid)
-            user_obj = User.objects.create(openid=openid,nickname=nickname)
+            nickname = "用户_" + str(User.objects.all().count()+1)
+            user_obj = User.objects.create(openid=openid, nickname=nickname)
             user_id = user_obj.id
             user_obj = User.objects.get(id=user_id)
             dashboard_obj = Dashboard(user=user_obj, collection_num=0, UploadFile_num=0, DownloadFile_num=0)

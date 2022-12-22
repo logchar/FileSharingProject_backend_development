@@ -5,8 +5,8 @@ from Files.models import *
 
 
 class FileAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')
-    search_fields = ('name', 'user_id')
+    list_display = ('user', 'name', 'suffix', 'address', 'size', 'department', 'subject', 'readme', 'download_num', 'auth_name')
+    search_fields = ('name', 'user')
 
 admin.site.register(File,FileAdmin)
 admin.site.register([CollectionPost, DownloadFilePost])

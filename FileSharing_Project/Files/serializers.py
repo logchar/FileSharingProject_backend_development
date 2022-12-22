@@ -3,8 +3,9 @@ from rest_framework import serializers
 from Files.models import *
 
 class FileSerializer(serializers.Serializer):
-    user_id = serializers.PrimaryKeyRelatedField(label='上传者id', read_only=True)
-    name = serializers.CharField(label='文件名', max_length=75)
+    user = serializers.PrimaryKeyRelatedField(label='上传者id', queryset=User.objects.all())
+    filename = models.CharField(verbose_name='文件名', max_length=75, required=False)
+    name = models.CharField(verbose_name='文件原名', max_length=75)
     suffix = serializers.CharField(label='后缀名', max_length=15)
     address = serializers.URLField(label='资源路径', max_length=200)
     size = serializers.CharField(label='文件大小', max_length=30)
@@ -15,16 +16,16 @@ class FileSerializer(serializers.Serializer):
     auth_name = serializers.CharField(label='上传者昵称', max_length=30)
 
     def validate(self, attrs):
-        if attrs['size'] > 512:
+        if float(attrs['size']) > 512:
             serializers.ValidationError('文件过大')
         return attrs
 
     def create(self, validated_data):
-        newbook = File.objects.create(**validated_data)
-        return newbook
+        newobj = File.objects.create(**validated_data)
+        return newobj
 
     def update(self, instance, validated_data):
-        instance.user_id = validated_data['user_id']
+        instance.user = validated_data['user']
         instance.name = validated_data['name']
         instance.suffix = validated_data['suffix']
         instance.address = validated_data['address']
