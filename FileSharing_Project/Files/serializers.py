@@ -13,10 +13,9 @@ class FileSerializer(serializers.Serializer):
     subject = serializers.CharField(label='学科', max_length=15, required=False)
     readme = serializers.CharField(label='简介', max_length=300, required=False)
     download_num = serializers.IntegerField(label='下载量', required=False)
-    auth_name = serializers.CharField(label='上传者昵称', max_length=30)
 
     def validate(self, attrs):
-        if float(attrs['size']) > 512:
+        if float(attrs['size']) > 512*1024:
             serializers.ValidationError('文件过大')
         return attrs
 
@@ -41,3 +40,26 @@ class FileSerializer(serializers.Serializer):
             instance.readme = validated_data['readme']
         instance.save()
         return instance
+
+
+class CollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollectionPost
+        fields = '__all__'
+
+
+class DownloadFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DownloadFilePost
+        fields = '__all__'
+
+
+def updata_download_num(FileID, num):
+    download_num = File.objects.filter(id=FileID).values('download_num')[0]['download_num']
+    File.objects.filter(id=FileID).update(download_num=download_num + num)
+
+
+def updata_dashboard(UserID, para, num):
+    cnt = Dashboard.objects.filter(id=UserID).values(para)[0][para]
+    para = para + "=" + str(cnt+num)
+    Dashboard.objects.filter(id=UserID).update(exec(para))

@@ -4,10 +4,10 @@ import time
 
 
 class jwt_sys():
-    def __init__(self,req):
+    def __init__(self, req):
         self.req = req
 
-    def create_jwt(self,user_id):
+    def create_jwt(self, user_id):
         tm = time.strptime(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S')
         out_time = datetime.datetime.now()+datetime.timedelta(days=1)
         tm_e = time.strptime(out_time.strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S')
@@ -24,11 +24,11 @@ class jwt_sys():
         token = self.req.META.get('HTTP_AUTHORIZATION')
         return token
 
-    def parse_jwt(self,token):
+    def parse_jwt(self, token):
         s = jwt.decode(token,'secret',issuer='ziqiang',algorithms=['HS256'])
         return s
 
-    def is_out_time(self,s):
+    def is_out_time(self, s):
         tm = time.strptime(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), '%Y-%m-%d %H:%M:%S')
         datetime_now = time.mktime(tm)
         end_time = s['exp']
@@ -37,7 +37,7 @@ class jwt_sys():
         else:
             return False
 
-    def get_user_id(self,token):
+    def get_user_id(self, token):
         user_id = jwt.decode(token, 'secret', issuer='ziqiang', algorithms=['HS256'])['data']
         return user_id
 
@@ -47,8 +47,8 @@ class jwt_sys():
             s = self.parse_jwt(token)
             if self.is_out_time(s) is True:
                 user_id = self.get_user_id(token)
-                return {'is_real':True,'user_id':user_id}
+                return user_id
             else:
-                return {'is_real': False}
+                raise PermissionError('TOKEN过期')
         else:
-            return {'is_real': False}
+            raise PermissionError('TOKEN为空')
