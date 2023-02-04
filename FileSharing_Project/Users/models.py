@@ -1,4 +1,5 @@
 from django.db import models
+from PIL import Image
 
 
 class User(models.Model):  # 用户信息

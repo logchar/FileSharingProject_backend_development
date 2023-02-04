@@ -4,10 +4,10 @@ import oss2
 class Oss:
 
     def __init__(self):
-        self.accessKeyId = "LTAI5t9ex2r4GWHcu3tHZwPU"
-        self.accessKeySecret = "laBUFWj3Aj1ZU0uw5rZsK13RxwjYgN"
+        self.accessKeyId = "LTAI5tAu8fZpvMspEemMjr9c"
+        self.accessKeySecret = "9u0iSlEB9EyldZlVppekC9ru8LJ1JT"
         self.endpoint = "oss-cn-hangzhou.aliyuncs.com"
-        self.bucketName = "zq-rookie-file-sharing"
+        self.bucketName = "ziqiang-resource"
 
     def upload_file(self, filename, file):
         auth = oss2.Auth(self.accessKeyId, self.accessKeySecret)

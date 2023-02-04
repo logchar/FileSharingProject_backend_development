@@ -6,7 +6,7 @@ from Users.models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['nickname', 'avatar', 'openid', 'QQ', 'WeChat']
+        fields = ['nickname', 'openid', 'QQ', 'WeChat']
 
 
 class DashboardSerializer(serializers.ModelSerializer):

@@ -24,16 +24,27 @@ from Users.views import *
 urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', my_view.serve),
     path("admin/", admin.site.urls),
+
     path("login/", log_reg),
+    path("collections/<int:pk>/", CollectionView.as_view()),
+    path("downloads/<int:pk>/", DownloadView.as_view()),
 
-    path("users/", UserViewSet.as_view({'get': 'get_userinfo', 'post': 'get_userfile_list', 'put': 'perform_update_userinfo'})),
+    path("users/<int:pk>/", UserViewSet.as_view({
+        'get': 'get_other_userinfo',
+        'post': 'perform_update_avatar'
+    })),
+    path("user/", UserViewSet.as_view({
+        'get': 'get_userinfo',
+        'post': 'get_userfile_list',
+        'put': 'perform_update_userinfo'
+    })),
 
-    path("files/", FileViewSet.as_view({'get': 'get_list', 'post': 'perform_upload'})),
-    path("files/<int:pk>/", FileViewSet.as_view({'get': 'get_detail', 'put': 'perform_change', 'delete': 'perform_delete'})),
-
-    path("collections/<int:pk>", CollectionView.as_view()),
-
-    path("downloads/<int:pk>", DownloadView.as_view()),
-
-    path("search/", FileViewSet.as_view({'get': 'perform_search'})),
+    path("filelist/<int:pk>/", FileViewSet.as_view({'get': 'get_list'})),
+    path("search/", FileViewSet.as_view({'post': 'perform_search'})),
+    path("files/<int:pk>/", FileViewSet.as_view({
+        'get': 'get_detail',
+        'post': 'perform_upload',
+        'put': 'perform_change',
+        'delete': 'perform_delete'
+    })),
 ]

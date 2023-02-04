@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
+from django_redis import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,9 +82,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "resource",
         "USER": "root",
-        "PASSWORD": "GAOchuHAN945",
+        "PASSWORD": "ziqiang",
         "HOST": "127.0.0.1",
-        "PORT": "3305",
+        "PORT": "3306",
     }
 }
 
@@ -124,26 +125,15 @@ STATICFILES_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
-OSS_ACCESS_KEY_ID = "LTAI5t9ex2r4GWHcu3tHZwPU"
-
-# AliCloud access key secret
-OSS_ACCESS_KEY_SECRET = "laBUFWj3Aj1ZU0uw5rZsK13RxwjYgN"
-# The name of the bucket to store files in
-OSS_BUCKET_NAME = "zq-rookie-file-sharing"
-
-# The URL of AliCloud OSS endpoint
-# Refer https://www.alibabacloud.com/help/zh/doc-detail/31837.htm for OSS Region & Endpoint
-OSS_ENDPOINT = "oss-cn-hangzhou.aliyuncs.com"
-
 # The default location for your files
-MEDIA_ROOT = os.path.join(BASE_DIR,"static/media_pics")
+MEDIA_ROOT = os.path.join(BASE_DIR, "static/media_pics")
 MEDIA_URL = '/media/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS=[
+STATICFILES_DIRS = [
     (os.path.join(BASE_DIR, 'static'))
 ]
 
@@ -151,3 +141,34 @@ STATICFILES_DIRS=[
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# celery==4 需要的配置参数
+CELERY_TASK_SERIALIZER = 'pickle'
+
+CELERY_RESULT_SERIALIZER = 'pickle'
+
+CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "session": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "upload": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+}

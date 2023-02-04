@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: resource-mysql
+    hostname: mysql
+    restart: always
+    networks:
+      - app-net
+    environment:
+      MYSQL_ROOT_PASSWORD: ziqiang
+      MYSQL_DATABASE: resource
+      MYSQL_USER: logchar
+      MYSQL_PASSWORD: resource
+      MYSQL_PORT: 3306
+      MYSQL_ALLOW_EMPTY_PASSWORD: no
+
+  redis:
+    image: redis
+    container_name: resource-redis
+    hostname: redis
+    restart: always
+    networks:
+      - app-net
+
+  django:
+    image: resource
+    depends_on:
+      - redis
+      - mysql
+    restart: always
+    container_name: resource-django
+    networks:
+      - app-net
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.http.routers.resource.rule: Host(`api.resource.temp.ziqiang.net.cn`)
+      traefik.http.routers.resource.entrypoints: websecure
+      traefik.http.services.resource.loadbalancer.server.port: 8082
+
+networks:
+  app-net: {}
+  traefik:
+    external: true
